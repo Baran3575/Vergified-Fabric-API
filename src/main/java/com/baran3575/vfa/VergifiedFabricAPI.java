@@ -18,8 +18,9 @@ public class VergifiedFabricAPI {
         // Register event listeners on Forge Bus
         NeoForge.EVENT_BUS.register(this);
         
-        // Payload Registration event listener on Mod Bus
+        // Payload and Creative Mode Tab contents event listeners on Mod Bus
         modEventBus.addListener(this::registerPayloads);
+        modEventBus.addListener(this::onBuildCreativeModeTabContents);
         
         if (FMLEnvironment.dist.isClient()) {
             VFAClient.init(modEventBus);
@@ -74,7 +75,6 @@ public class VergifiedFabricAPI {
         });
     }
 
-    @net.neoforged.bus.api.SubscribeEvent
     public void onBuildCreativeModeTabContents(net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent event) {
         net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents.Event fabricEvent = 
             net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents.getEvents().get(event.getTabKey());
