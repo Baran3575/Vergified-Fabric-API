@@ -43,7 +43,7 @@ neoForge {
 }
 
 dependencies {
-    compileOnly "net.fabricmc.fabric-api:fabric-api:0.102.0+1.21.1"
+    // Implement API manually
 }
 
 tasks.withType(JavaCompile).configureEach {
