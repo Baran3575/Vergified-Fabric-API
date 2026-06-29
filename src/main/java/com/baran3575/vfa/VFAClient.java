@@ -32,18 +32,24 @@ public class VFAClient {
     }
 
     private static void onClientPlayerLogin(net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent.LoggingIn event) {
-        net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.JOIN.invoker().onPlayReady(
-            event.getConnection(),
-            null,
-            net.minecraft.client.Minecraft.getInstance()
-        );
+        net.minecraft.client.multiplayer.ClientPacketListener connection = net.minecraft.client.Minecraft.getInstance().getConnection();
+        if (connection != null) {
+            net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.JOIN.invoker().onPlayReady(
+                connection,
+                null,
+                net.minecraft.client.Minecraft.getInstance()
+            );
+        }
     }
 
     private static void onClientPlayerLogout(net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent.LoggingOut event) {
-        net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.DISCONNECT.invoker().onPlayDisconnect(
-            event.getConnection(),
-            net.minecraft.client.Minecraft.getInstance()
-        );
+        net.minecraft.client.multiplayer.ClientPacketListener connection = net.minecraft.client.Minecraft.getInstance().getConnection();
+        if (connection != null) {
+            net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.DISCONNECT.invoker().onPlayDisconnect(
+                connection,
+                net.minecraft.client.Minecraft.getInstance()
+            );
+        }
     }
 
     private static void onClientTickPre(net.neoforged.neoforge.client.event.ClientTickEvent.Pre event) {
