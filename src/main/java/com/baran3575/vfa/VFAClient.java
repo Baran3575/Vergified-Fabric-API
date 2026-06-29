@@ -21,6 +21,49 @@ public class VFAClient {
         NeoForge.EVENT_BUS.addListener(VFAClient::onScreenInitPost);
         NeoForge.EVENT_BUS.addListener(VFAClient::onScreenRenderPost);
         NeoForge.EVENT_BUS.addListener(VFAClient::onHudRenderPost);
+        
+        NeoForge.EVENT_BUS.addListener(VFAClient::onClientTickPre);
+        NeoForge.EVENT_BUS.addListener(VFAClient::onClientTickPost);
+        NeoForge.EVENT_BUS.addListener(VFAClient::onLevelTickPre);
+        NeoForge.EVENT_BUS.addListener(VFAClient::onLevelTickPost);
+        
+        NeoForge.EVENT_BUS.addListener(VFAClient::onClientPlayerLogin);
+        NeoForge.EVENT_BUS.addListener(VFAClient::onClientPlayerLogout);
+    }
+
+    private static void onClientPlayerLogin(net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent.LoggingIn event) {
+        net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.JOIN.invoker().onPlayReady(
+            event.getConnection(),
+            null,
+            net.minecraft.client.Minecraft.getInstance()
+        );
+    }
+
+    private static void onClientPlayerLogout(net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent.LoggingOut event) {
+        net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.DISCONNECT.invoker().onPlayDisconnect(
+            event.getConnection(),
+            net.minecraft.client.Minecraft.getInstance()
+        );
+    }
+
+    private static void onClientTickPre(net.neoforged.neoforge.client.event.ClientTickEvent.Pre event) {
+        net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.START_CLIENT_TICK.invoker().onStartTick(net.minecraft.client.Minecraft.getInstance());
+    }
+
+    private static void onClientTickPost(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
+        net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_CLIENT_TICK.invoker().onEndTick(net.minecraft.client.Minecraft.getInstance());
+    }
+
+    private static void onLevelTickPre(net.neoforged.neoforge.event.tick.LevelTickEvent.Pre event) {
+        if (event.getLevel().isClientSide() && event.getLevel() instanceof net.minecraft.client.multiplayer.ClientLevel cl) {
+            net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.START_WORLD_TICK.invoker().onStartTick(cl);
+        }
+    }
+
+    private static void onLevelTickPost(net.neoforged.neoforge.event.tick.LevelTickEvent.Post event) {
+        if (event.getLevel().isClientSide() && event.getLevel() instanceof net.minecraft.client.multiplayer.ClientLevel cl) {
+            net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_WORLD_TICK.invoker().onEndTick(cl);
+        }
     }
 
     private static void onRegisterBlockColors(net.neoforged.neoforge.client.event.RegisterColorHandlersEvent.Block event) {
