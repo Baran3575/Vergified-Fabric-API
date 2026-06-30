@@ -144,7 +144,7 @@ public class VFAClient {
         if (event.getName().equals(net.neoforged.neoforge.client.gui.VanillaGuiLayers.HOTBAR)) {
             net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback.EVENT.invoker().onHudRender(
                 event.getGuiGraphics(),
-                event.getPartialTick()
+                0.0f
             );
         }
     }
