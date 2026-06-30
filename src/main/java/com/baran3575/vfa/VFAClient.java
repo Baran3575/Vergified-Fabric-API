@@ -139,10 +139,13 @@ public class VFAClient {
         );
     }
 
-    private static void onHudRenderPost(net.neoforged.neoforge.client.event.RenderGuiEvent.Post event) {
-        net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback.EVENT.invoker().onHudRender(
-            event.getGuiGraphics(),
-            0.0f
-        );
+    private static void onHudRenderPost(net.neoforged.neoforge.client.event.RenderGuiLayerEvent.Post event) {
+        // ponytail: render Fabric HUD callbacks after the hotbar layer (corresponds to post-HUD render in Fabric)
+        if (event.getName().equals(net.neoforged.neoforge.client.gui.VanillaGuiLayers.HOTBAR)) {
+            net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback.EVENT.invoker().onHudRender(
+                event.getGuiGraphics(),
+                0.0f
+            );
+        }
     }
 }
