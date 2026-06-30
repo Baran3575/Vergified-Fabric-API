@@ -30,6 +30,6 @@ public final class ServerPlayNetworking {
     }
 
     public static void send(ServerPlayer player, CustomPacketPayload payload) {
-        player.connection.send(payload);
+        player.connection.send(new net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket(payload));
     }
 }

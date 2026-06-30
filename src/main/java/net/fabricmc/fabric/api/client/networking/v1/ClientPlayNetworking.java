@@ -1,4 +1,4 @@
-package net.fabricmc.fabric.api.networking.v1;
+package net.fabricmc.fabric.api.client.networking.v1;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,7 +32,7 @@ public final class ClientPlayNetworking {
 
     public static void send(CustomPacketPayload payload) {
         if (Minecraft.getInstance().getConnection() != null) {
-            Minecraft.getInstance().getConnection().send(payload);
+            Minecraft.getInstance().getConnection().send(new net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket(payload));
         }
     }
 }
