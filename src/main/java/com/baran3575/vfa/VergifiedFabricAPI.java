@@ -30,18 +30,25 @@ public class VergifiedFabricAPI {
     // Packet payload registration logic
     private void registerPayloads(net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent event) {
         LOGGER.info("[VFA] Registering Fabric custom payload networking channels to NeoForge...");
-        net.neoforged.neoforge.network.registration.PayloadRegistrar registrar = event.registrar(MODID);
 
         // Register Server Receivers (C2S)
         net.fabricmc.fabric.impl.networking.PayloadTypeRegistryImpl playC2S = net.fabricmc.fabric.impl.networking.PayloadTypeRegistryImpl.PLAY_C2S;
-        for (java.util.Map.Entry<net.minecraft.network.protocol.common.custom.CustomPacketPayload.Type<?>, net.minecraft.network.codec.StreamCodec<? super net.minecraft.network.FriendlyByteBuf, ?>> entry : playC2S.getCodecs().entrySet()) {
+        for (java.util.Map.Entry<net.minecraft.network.protocol.common.custom.CustomPacketPayload.Type<?>, net.minecraft.network.codec.StreamCodec<? super net.minecraft.network.RegistryFriendlyByteBuf, ?>> entry : playC2S.getCodecs().entrySet()) {
+            String namespace = entry.getKey().id().getNamespace();
+            net.neoforged.neoforge.network.registration.PayloadRegistrar registrar = event.registrar(namespace);
             registerServerChannel(registrar, (net.minecraft.network.protocol.common.custom.CustomPacketPayload.Type) entry.getKey(), (net.minecraft.network.codec.StreamCodec) entry.getValue());
         }
 
         // Register Client Receivers (S2C)
         net.fabricmc.fabric.impl.networking.PayloadTypeRegistryImpl playS2C = net.fabricmc.fabric.impl.networking.PayloadTypeRegistryImpl.PLAY_S2C;
-        for (java.util.Map.Entry<net.minecraft.network.protocol.common.custom.CustomPacketPayload.Type<?>, net.minecraft.network.codec.StreamCodec<? super net.minecraft.network.FriendlyByteBuf, ?>> entry : playS2C.getCodecs().entrySet()) {
-            registerClientChannel(registrar, (net.minecraft.network.protocol.common.custom.CustomPacketPayload.Type) entry.getKey(), (net.minecraft.network.codec.StreamCodec) entry.getValue());
+        for (java.util.Map.Entry<net.minecraft.network.protocol.common.custom.CustomPacketPayload.Type<?>, net.minecraft.network.codec.StreamCodec<? super net.minecraft.network.RegistryFriendlyByteBuf, ?>> entry : playS2C.getCodecs().entrySet()) {
+            String namespace = entry.getKey().id().getNamespace();
+            net.neoforged.neoforge.network.registration.PayloadRegistrar registrar = event.registrar(namespace);
+            if (FMLEnvironment.dist.isClient()) {
+                com.baran3575.vfa.VFAClientHelper.registerClientChannel(registrar, (net.minecraft.network.protocol.common.custom.CustomPacketPayload.Type) entry.getKey(), (net.minecraft.network.codec.StreamCodec) entry.getValue());
+            } else {
+                registerClientChannelDummy(registrar, (net.minecraft.network.protocol.common.custom.CustomPacketPayload.Type) entry.getKey(), (net.minecraft.network.codec.StreamCodec) entry.getValue());
+            }
         }
     }
 
@@ -60,18 +67,9 @@ public class VergifiedFabricAPI {
         });
     }
 
-    @SuppressWarnings("unchecked")
-    private <T extends net.minecraft.network.protocol.common.custom.CustomPacketPayload> void registerClientChannel(net.neoforged.neoforge.network.registration.PayloadRegistrar registrar, net.minecraft.network.protocol.common.custom.CustomPacketPayload.Type<T> type, net.minecraft.network.codec.StreamCodec<? super net.minecraft.network.RegistryFriendlyByteBuf, T> codec) {
+    private <T extends net.minecraft.network.protocol.common.custom.CustomPacketPayload> void registerClientChannelDummy(net.neoforged.neoforge.network.registration.PayloadRegistrar registrar, net.minecraft.network.protocol.common.custom.CustomPacketPayload.Type<T> type, net.minecraft.network.codec.StreamCodec<? super net.minecraft.network.RegistryFriendlyByteBuf, T> codec) {
         registrar.playToClient(type, codec, (payload, context) -> {
-            net.fabricmc.fabric.api.networking.v1.ClientPlayNetworking.PlayPayloadHandler<T> handler = (net.fabricmc.fabric.api.networking.v1.ClientPlayNetworking.PlayPayloadHandler<T>) net.fabricmc.fabric.api.networking.v1.ClientPlayNetworking.getReceivers().get(type);
-            if (handler != null) {
-                context.enqueueWork(() -> handler.receive(payload, new net.fabricmc.fabric.api.networking.v1.ClientPlayNetworking.Context() {
-                    @Override
-                    public net.minecraft.client.player.LocalPlayer player() {
-                        return (net.minecraft.client.player.LocalPlayer) context.player();
-                    }
-                }));
-            }
+            // Do nothing on server
         });
     }
 

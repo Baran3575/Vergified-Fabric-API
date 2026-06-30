@@ -2,7 +2,7 @@ package net.fabricmc.fabric.api.networking.v1;
 
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 
 public interface PayloadTypeRegistry {
     PayloadTypeRegistry PLAY_C2S = net.fabricmc.fabric.impl.networking.PayloadTypeRegistryImpl.PLAY_C2S;
@@ -16,5 +16,13 @@ public interface PayloadTypeRegistry {
         return PLAY_S2C;
     }
 
-    <T extends CustomPacketPayload> void register(CustomPacketPayload.Type<T> type, StreamCodec<? super FriendlyByteBuf, T> codec);
+    static PayloadTypeRegistry serverboundPlay() {
+        return PLAY_C2S;
+    }
+
+    static PayloadTypeRegistry clientboundPlay() {
+        return PLAY_S2C;
+    }
+
+    <T extends CustomPacketPayload> void register(CustomPacketPayload.Type<T> type, StreamCodec<? super RegistryFriendlyByteBuf, T> codec);
 }
