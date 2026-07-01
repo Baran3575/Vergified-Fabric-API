@@ -10,6 +10,11 @@ public final class ClientPlayNetworking {
     private static final Map<CustomPacketPayload.Type<?>, PlayPayloadHandler<?>> RECEIVERS = new HashMap<>();
 
     @FunctionalInterface
+    public interface PacketSender {
+        <T extends CustomPacketPayload> void sendPacket(CustomPacketPayload.Type<T> type, T payload);
+    }
+
+    @FunctionalInterface
     public interface PlayPayloadHandler<T extends CustomPacketPayload> {
         void receive(T payload, Context context);
     }
