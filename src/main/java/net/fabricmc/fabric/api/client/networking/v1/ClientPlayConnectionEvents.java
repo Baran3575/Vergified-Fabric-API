@@ -34,7 +34,7 @@ public final class ClientPlayConnectionEvents {
 
     @FunctionalInterface
     public interface Join {
-        void onPlayReady(ClientPacketListener handler, Object sender, Minecraft client);
+        void onPlayReady(ClientPacketListener handler, ClientPlayNetworking.PacketSender sender, Minecraft client);
     }
 
     @FunctionalInterface

@@ -34,9 +34,18 @@ public class VFAClient {
     private static void onClientPlayerLogin(net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent.LoggingIn event) {
         net.minecraft.client.multiplayer.ClientPacketListener connection = net.minecraft.client.Minecraft.getInstance().getConnection();
         if (connection != null) {
+            net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.INIT.invoker().onPlayInit(
+                connection,
+                net.minecraft.client.Minecraft.getInstance()
+            );
             net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.JOIN.invoker().onPlayReady(
                 connection,
-                null,
+                new net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.PacketSender() {
+                    @Override
+                    public <T extends net.minecraft.network.protocol.common.custom.CustomPacketPayload> void sendPacket(net.minecraft.network.protocol.common.custom.CustomPacketPayload.Type<T> type, T payload) {
+                        net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(payload);
+                    }
+                },
                 net.minecraft.client.Minecraft.getInstance()
             );
         }
@@ -140,11 +149,11 @@ public class VFAClient {
     }
 
     private static void onHudRenderPost(net.neoforged.neoforge.client.event.RenderGuiLayerEvent.Post event) {
-        // ponytail: render Fabric HUD callbacks after the hotbar layer (corresponds to post-HUD render in Fabric)
-        if (event.getName().equals(net.neoforged.neoforge.client.gui.VanillaGuiLayers.HOTBAR)) {
+        // ponytail: render Fabric HUD callbacks after ALL layers (matches Fabric's post-HUD render timing)
+        if (event.getName().equals(net.neoforged.neoforge.client.gui.VanillaGuiLayers.SUBTITLE_OVERLAY)) {
             net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback.EVENT.invoker().onHudRender(
                 event.getGuiGraphics(),
-                0.0f
+                event.getPartialTick().getGameTimeDeltaPartialTick(false)
             );
         }
     }
