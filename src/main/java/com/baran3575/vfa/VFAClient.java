@@ -2,13 +2,23 @@ package com.baran3575.vfa;
 
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
+import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
+import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
+import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.server.packs.PackType;
+import net.minecraft.resources.ResourceLocation;
+import com.mojang.brigadier.CommandDispatcher;
+import net.minecraft.commands.CommandBuildContext;
 
 public class VFAClient {
     public static void init(IEventBus modEventBus) {
@@ -20,15 +30,24 @@ public class VFAClient {
 
         NeoForge.EVENT_BUS.addListener(VFAClient::onScreenInitPost);
         NeoForge.EVENT_BUS.addListener(VFAClient::onScreenRenderPost);
-        NeoForge.EVENT_BUS.addListener(VFAClient::onHudRenderPost);
-        
+
         NeoForge.EVENT_BUS.addListener(VFAClient::onClientTickPre);
         NeoForge.EVENT_BUS.addListener(VFAClient::onClientTickPost);
         NeoForge.EVENT_BUS.addListener(VFAClient::onLevelTickPre);
         NeoForge.EVENT_BUS.addListener(VFAClient::onLevelTickPost);
-        
+
         NeoForge.EVENT_BUS.addListener(VFAClient::onClientPlayerLogin);
         NeoForge.EVENT_BUS.addListener(VFAClient::onClientPlayerLogout);
+
+        // ponytail: fire Fabric HudRenderCallback from a real GUI layer so Jade's
+        // overlay draws every frame regardless of which vanilla layer is active
+        // (the old SUBTITLE_OVERLAY gating made it never render with subtitles off).
+        modEventBus.addListener(VFAClient::onRegisterGuiLayers);
+
+        NeoForge.EVENT_BUS.addListener(VFAClient::onClientEntityJoin);
+        NeoForge.EVENT_BUS.addListener(VFAClient::onClientEntityLeave);
+        NeoForge.EVENT_BUS.addListener(VFAClient::onItemTooltip);
+        NeoForge.EVENT_BUS.addListener(VFAClient::onRegisterClientCommands);
     }
 
     private static void onClientPlayerLogin(net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent.LoggingIn event) {
@@ -61,8 +80,14 @@ public class VFAClient {
         }
     }
 
+    private static boolean clientStartedFired = false;
+
     private static void onClientTickPre(net.neoforged.neoforge.client.event.ClientTickEvent.Pre event) {
         net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.START_CLIENT_TICK.invoker().onStartTick(net.minecraft.client.Minecraft.getInstance());
+        if (!clientStartedFired) {
+            clientStartedFired = true;
+            net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents.CLIENT_STARTED.invoker().onClientStarted(net.minecraft.client.Minecraft.getInstance());
+        }
     }
 
     private static void onClientTickPost(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
@@ -148,13 +173,49 @@ public class VFAClient {
         );
     }
 
-    private static void onHudRenderPost(net.neoforged.neoforge.client.event.RenderGuiLayerEvent.Post event) {
-        // ponytail: render Fabric HUD callbacks after ALL layers (matches Fabric's post-HUD render timing)
-        if (event.getName().equals(net.neoforged.neoforge.client.gui.VanillaGuiLayers.SUBTITLE_OVERLAY)) {
-            net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback.EVENT.invoker().onHudRender(
-                event.getGuiGraphics(),
-                event.getPartialTick().getGameTimeDeltaPartialTick(false)
-            );
+    private static void onRegisterGuiLayers(net.neoforged.neoforge.client.event.RegisterGuiLayersEvent event) {
+        event.registerAbove(
+            VanillaGuiLayers.HUD,
+            ResourceLocation.fromNamespaceAndPath("vfa", "hud_layer"),
+            (guiGraphics, deltaTracker) -> {
+                net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback.EVENT.invoker().onHudRender(
+                    guiGraphics,
+                    deltaTracker.getRealtimeDeltaTicks()
+                );
+            });
+    }
+
+    private static void onClientEntityJoin(EntityJoinLevelEvent event) {
+        if (event.getLevel().isClientSide()) {
+            net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents.ENTITY_LOAD.invoker()
+                .onEntityJoin(event.getEntity(), event.getLevel());
         }
+    }
+
+    private static void onClientEntityLeave(EntityLeaveLevelEvent event) {
+        if (event.getLevel().isClientSide()) {
+            net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents.ENTITY_UNLOAD.invoker()
+                .onEntityLeave(event.getEntity(), event.getLevel());
+        }
+    }
+
+    private static void onItemTooltip(ItemTooltipEvent event) {
+        net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback.EVENT.invoker().onItemTooltip(
+            event.getItemStack(),
+            event.getContext(),
+            event.getToolTip(),
+            event.getFlags()
+        );
+    }
+
+    // ponytail: Fabric's client command dispatcher is <FabricClientCommandSource>; NeoForge's is
+    // <ClientCommandSourceStack>. We can't bridge the types, so Jade's /jade command tree is built
+    // into a standalone dispatcher (harmless) but not wired to execution yet. Core Jade (overlay,
+    // keybinds, networking) is unaffected. Full command execution = later iteration.
+    private static void onRegisterClientCommands(RegisterClientCommandsEvent event) {
+        com.mojang.brigadier.CommandDispatcher<net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource> dispatcher =
+            new com.mojang.brigadier.CommandDispatcher<>();
+        net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback.EVENT.invoker()
+            .register(dispatcher, event.getBuildContext());
     }
 }
