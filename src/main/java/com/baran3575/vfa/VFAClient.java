@@ -3,7 +3,6 @@ package com.baran3575.vfa;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
-import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
@@ -174,8 +173,7 @@ public class VFAClient {
     }
 
     private static void onRegisterGuiLayers(net.neoforged.neoforge.client.event.RegisterGuiLayersEvent event) {
-        event.registerAbove(
-            VanillaGuiLayers.HUD,
+        event.register(
             ResourceLocation.fromNamespaceAndPath("vfa", "hud_layer"),
             (guiGraphics, deltaTracker) -> {
                 net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback.EVENT.invoker().onHudRender(
