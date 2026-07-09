@@ -173,7 +173,7 @@ public class VFAClient {
     }
 
     private static void onRegisterGuiLayers(net.neoforged.neoforge.client.event.RegisterGuiLayersEvent event) {
-        event.register(
+        event.registerAboveAll(
             ResourceLocation.fromNamespaceAndPath("vfa", "hud_layer"),
             (guiGraphics, deltaTracker) -> {
                 net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback.EVENT.invoker().onHudRender(
