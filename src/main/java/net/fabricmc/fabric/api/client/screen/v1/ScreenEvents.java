@@ -6,11 +6,11 @@ import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.Minecraft;
 import org.slf4j.Logger;
-import org.slf4j.LogUtils;
+import org.slf4j.LoggerFactory;
 
 public final class ScreenEvents {
 
-    private static final Logger LOGGER = LogUtils.getLogger();
+    private static final Logger LOGGER = LoggerFactory.getLogger(ScreenEvents.class);
 
     private ScreenEvents() {}
 

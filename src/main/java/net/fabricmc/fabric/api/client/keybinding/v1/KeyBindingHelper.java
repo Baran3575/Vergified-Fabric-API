@@ -4,11 +4,11 @@ import net.minecraft.client.KeyMapping;
 import java.util.List;
 import java.util.ArrayList;
 import org.slf4j.Logger;
-import org.slf4j.LogUtils;
+import org.slf4j.LoggerFactory;
 
 public final class KeyBindingHelper {
 
-    private static final Logger LOGGER = LogUtils.getLogger();
+    private static final Logger LOGGER = LoggerFactory.getLogger(KeyBindingHelper.class);
     private static final List<KeyMapping> PENDING_KEYBINDINGS = new ArrayList<>();
 
     private KeyBindingHelper() {}
