@@ -81,6 +81,7 @@ class NeoForgeItemStorage implements SlottedStorage<ItemVariant> {
 	public long getVersion() {
 		long hash = 0;
 		for (StorageView<ItemVariant> v : build()) {
+			hash = hash * 31 + (v.getResource() == null ? 0 : v.getResource().toStack().getItem().hashCode());
 			hash = hash * 31 + v.getAmount();
 		}
 		return hash;

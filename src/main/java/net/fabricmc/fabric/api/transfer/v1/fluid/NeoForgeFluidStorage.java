@@ -65,6 +65,7 @@ class NeoForgeFluidStorage implements FluidStorage {
 	public long getVersion() {
 		long hash = 0;
 		for (StorageView<FluidVariant> v : build()) {
+			hash = hash * 31 + (v.getResource() == null ? 0 : v.getResource().getFluid().hashCode());
 			hash = hash * 31 + v.getAmount();
 		}
 		return hash;
