@@ -1,6 +1,7 @@
 package net.fabricmc.fabric.api.transfer.v1.fluid;
 
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.material.Fluid;
 
 public final class FluidVariantAttributes {
 	public static Component getName(FluidVariant variant) {

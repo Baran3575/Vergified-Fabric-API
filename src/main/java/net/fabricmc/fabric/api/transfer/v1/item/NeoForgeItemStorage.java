@@ -11,7 +11,7 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandler;
 
 // ponytail: bridges NeoForge IItemHandler capability to Fabric's SlottedStorage<ItemVariant>.
-class NeoForgeItemStorage implements SlottedStorage<ItemVariant> {
+class NeoForgeItemStorage implements ItemStorage, SlottedStorage<ItemVariant> {
 	private final IItemHandler handler;
 
 	NeoForgeItemStorage(IItemHandler handler) {

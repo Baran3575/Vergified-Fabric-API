@@ -264,7 +264,7 @@ public class VergifiedFabricAPI {
     public void onTagsUpdated(net.neoforged.neoforge.event.TagsUpdatedEvent event) {
         try {
             net.fabricmc.fabric.api.event.lifecycle.v1.CommonLifecycleEvents.TAGS_LOADED.invoker()
-                    .accept(event.getRegistryAccess(), event.isLastUpdate());
+                    .accept(event.getRegistryAccess(), true);
         } catch (Exception e) { LOGGER.warn("[VFA] TAGS_LOADED handler error", e); }
     }
 }
