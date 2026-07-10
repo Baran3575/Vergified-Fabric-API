@@ -259,4 +259,12 @@ public class VergifiedFabricAPI {
             catch (Exception e) { LOGGER.warn("[VFA] COMMAND_REGISTRATION handler error", e); }
         }
     }
+
+    @net.neoforged.bus.api.SubscribeEvent
+    public void onTagsUpdated(net.neoforged.neoforge.event.TagsUpdatedEvent event) {
+        try {
+            net.fabricmc.fabric.api.event.lifecycle.v1.CommonLifecycleEvents.TAGS_LOADED.invoker()
+                    .accept(event.getRegistryAccess(), event.isLastUpdate());
+        } catch (Exception e) { LOGGER.warn("[VFA] TAGS_LOADED handler error", e); }
+    }
 }
