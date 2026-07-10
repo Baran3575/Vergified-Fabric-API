@@ -9,7 +9,7 @@ public final class FluidVariantAttributes {
 		if (fluid == null || fluid == net.minecraft.world.level.material.Fluids.EMPTY) {
 			return Component.translatable("block.air");
 		}
-		return Component.translatable(fluid.getDescriptionId());
+		return Component.translatable(fluid.defaultFluidState().getDescriptionId());
 	}
 
 	private FluidVariantAttributes() {

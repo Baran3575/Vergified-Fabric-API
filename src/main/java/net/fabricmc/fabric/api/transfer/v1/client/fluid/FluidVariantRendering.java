@@ -30,8 +30,7 @@ public final class FluidVariantRendering {
 		public int getColor(FluidVariant variant, @Nullable Level level, @Nullable FluidState state) {
 			Fluid fluid = variant.getFluid();
 			if (fluid == null) return 0xFFFFFF;
-			FluidState fs = state != null ? state : fluid.defaultFluidState();
-			return IClientFluidTypeExtensions.of(fluid).getTintColor(fs);
+			return IClientFluidTypeExtensions.of(fluid).getTintColor(new net.neoforged.neoforge.fluids.FluidStack(fluid, 1));
 		}
 	};
 
