@@ -33,9 +33,10 @@ public class VergifiedFabricAPI {
 
         // Register Server Receivers (C2S)
         net.fabricmc.fabric.impl.networking.PayloadTypeRegistryImpl playC2S = net.fabricmc.fabric.impl.networking.PayloadTypeRegistryImpl.PLAY_C2S;
+        java.util.Map<String, net.neoforged.neoforge.network.registration.PayloadRegistrar> registrars = new java.util.HashMap<>();
         for (java.util.Map.Entry<net.minecraft.network.protocol.common.custom.CustomPacketPayload.Type<?>, net.minecraft.network.codec.StreamCodec<? super net.minecraft.network.RegistryFriendlyByteBuf, ?>> entry : playC2S.getCodecs().entrySet()) {
             String namespace = entry.getKey().id().getNamespace();
-            net.neoforged.neoforge.network.registration.PayloadRegistrar registrar = event.registrar(namespace);
+            net.neoforged.neoforge.network.registration.PayloadRegistrar registrar = registrars.computeIfAbsent(namespace, event::registrar);
             registerServerChannel(registrar, (net.minecraft.network.protocol.common.custom.CustomPacketPayload.Type) entry.getKey(), (net.minecraft.network.codec.StreamCodec) entry.getValue());
         }
 
@@ -43,7 +44,7 @@ public class VergifiedFabricAPI {
         net.fabricmc.fabric.impl.networking.PayloadTypeRegistryImpl playS2C = net.fabricmc.fabric.impl.networking.PayloadTypeRegistryImpl.PLAY_S2C;
         for (java.util.Map.Entry<net.minecraft.network.protocol.common.custom.CustomPacketPayload.Type<?>, net.minecraft.network.codec.StreamCodec<? super net.minecraft.network.RegistryFriendlyByteBuf, ?>> entry : playS2C.getCodecs().entrySet()) {
             String namespace = entry.getKey().id().getNamespace();
-            net.neoforged.neoforge.network.registration.PayloadRegistrar registrar = event.registrar(namespace);
+            net.neoforged.neoforge.network.registration.PayloadRegistrar registrar = registrars.computeIfAbsent(namespace, event::registrar);
             if (FMLEnvironment.dist.isClient()) {
                 com.baran3575.vfa.VFAClientHelper.registerClientChannel(registrar, (net.minecraft.network.protocol.common.custom.CustomPacketPayload.Type) entry.getKey(), (net.minecraft.network.codec.StreamCodec) entry.getValue());
             } else {
@@ -193,7 +194,7 @@ public class VergifiedFabricAPI {
 
     @net.neoforged.bus.api.SubscribeEvent
     public void onPlayerJoin(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent event) {
-        if (event.getEntity() instanceof net.minecraft.server.level.ServerPlayer sp && sp.getServer() != null) {
+        if (event.getEntity() instanceof net.minecraft.server.level.ServerPlayer sp && sp.getServer() != null && sp.connection != null) {
             for (net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.Join h : net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.JOIN.getHandlers()) {
                 try { h.onPlayReady(sp.connection, sp.getServer()); } catch (Exception e) { LOGGER.warn("[VFA] PLAY_JOIN handler error", e); }
             }
@@ -202,7 +203,7 @@ public class VergifiedFabricAPI {
 
     @net.neoforged.bus.api.SubscribeEvent
     public void onPlayerLeave(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent event) {
-        if (event.getEntity() instanceof net.minecraft.server.level.ServerPlayer sp && sp.getServer() != null) {
+        if (event.getEntity() instanceof net.minecraft.server.level.ServerPlayer sp && sp.getServer() != null && sp.connection != null) {
             for (net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.Disconnect h : net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT.getHandlers()) {
                 try { h.onPlayDisconnect(sp.connection, sp.getServer()); } catch (Exception e) { LOGGER.warn("[VFA] PLAY_DISCONNECT handler error", e); }
             }
@@ -264,7 +265,7 @@ public class VergifiedFabricAPI {
     public void onTagsUpdated(net.neoforged.neoforge.event.TagsUpdatedEvent event) {
         try {
             net.fabricmc.fabric.api.event.lifecycle.v1.CommonLifecycleEvents.TAGS_LOADED.invoker()
-                    .accept(event.getRegistryAccess(), true);
+                    .accept(event.getRegistryAccess(), false);
         } catch (Exception e) { LOGGER.warn("[VFA] TAGS_LOADED handler error", e); }
     }
 }

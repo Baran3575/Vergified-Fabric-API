@@ -1,6 +1,7 @@
 package net.fabricmc.fabric.api.transfer.v1.item;
 
 import net.minecraft.world.item.ItemStack;
+import java.util.Objects;
 
 public final class ItemVariant {
 	private final ItemStack stack;
@@ -32,6 +33,6 @@ public final class ItemVariant {
 
 	@Override
 	public int hashCode() {
-		return stack.getItem().hashCode();
+		return Objects.hash(stack.getItem(), stack.getComponents());
 	}
 }

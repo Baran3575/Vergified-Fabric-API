@@ -111,6 +111,7 @@ public class VFAClient {
         for (net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistryImpl.Registration<Block, BlockColor> reg : blockRegistry.getPending()) {
             event.register(reg.provider, reg.objects);
         }
+        blockRegistry.getPending().clear();
     }
 
     private static void onRegisterItemColors(net.neoforged.neoforge.client.event.RegisterColorHandlersEvent.Item event) {
@@ -119,15 +120,18 @@ public class VFAClient {
         for (net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistryImpl.Registration<Item, ItemColor> reg : itemRegistry.getPending()) {
             event.register(reg.provider, reg.objects);
         }
+        itemRegistry.getPending().clear();
     }
 
     private static void onRegisterRenderers(net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterRenderers event) {
         for (net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry.Registration<?> reg : net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry.getPending()) {
             registerBlockEntityHelper(event, reg);
         }
+        net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry.getPending().clear();
         for (net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.Registration<?> reg : net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.getPending()) {
             registerEntityHelper(event, reg);
         }
+        net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.getPending().clear();
     }
 
     @SuppressWarnings("unchecked")
@@ -168,7 +172,7 @@ public class VFAClient {
             event.getGuiGraphics(),
             event.getMouseX(),
             event.getMouseY(),
-            0.0f
+            event.getPartialTick()
         );
     }
 

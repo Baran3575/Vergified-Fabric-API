@@ -39,7 +39,7 @@ public final class FluidVariant {
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (!(o instanceof FluidVariant other)) return false;
-		return fluid == other.fluid;
+		return fluid == other.fluid && java.util.Objects.equals(components, other.components);
 	}
 
 	@Override

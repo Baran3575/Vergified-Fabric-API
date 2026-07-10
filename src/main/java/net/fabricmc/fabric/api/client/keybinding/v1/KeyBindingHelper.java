@@ -3,9 +3,12 @@ package net.fabricmc.fabric.api.client.keybinding.v1;
 import net.minecraft.client.KeyMapping;
 import java.util.List;
 import java.util.ArrayList;
+import org.slf4j.Logger;
+import org.slf4j.LogUtils;
 
 public final class KeyBindingHelper {
-    
+
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final List<KeyMapping> PENDING_KEYBINDINGS = new ArrayList<>();
 
     private KeyBindingHelper() {}
@@ -17,7 +20,7 @@ public final class KeyBindingHelper {
      */
     public static KeyMapping registerKeyBinding(KeyMapping keyBinding) {
         PENDING_KEYBINDINGS.add(keyBinding);
-        System.out.println("[Verg Connector API] Queued KeyBinding for registration: " + keyBinding.getName());
+        LOGGER.debug("[VFA] Queued KeyBinding for registration: {}", keyBinding.getName());
         return keyBinding;
     }
     
