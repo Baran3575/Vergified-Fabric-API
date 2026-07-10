@@ -26,7 +26,7 @@ side="BOTH"
 # ponytail: load VFA before Fabric mods so its shim classes/events exist first
 [[dependencies.vfa]]
 modId="jade"
-type="before"
+type="optional"
 versionRange="[15,)"
-ordering="NONE"
+ordering="BEFORE"
 side="BOTH"
